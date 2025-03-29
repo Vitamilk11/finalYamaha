@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        input {
+            width: 70%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        .add-btn {
+            background: #28a745;
+            color: white;
+        }
+        .add-btn:hover {
+            background: #218838;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        li {
+            background: #fff;
+            margin: 5px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .task-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .status-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .pending {
+            background: crimson;
+        }
+        .pending:hover {
+            background: darkred;
+        }
+        .completed {
+            background: #28a745;
+        }
+        .completed:hover {
+            background: #218838;
+        }
+        .delete-btn {
+            background: rgb(255, 0, 0);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .delete-btn:hover {
+            background: rgb(253, 105, 105);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>สิ่งที่ต้องทำ ✅</h1>
+        <input type="text" id="taskInput" placeholder="เพิ่มงานที่ต้องทำ...">
+        <button class="add-btn" onclick="addTask()">เพิ่ม</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function addTask() {
+            let taskInput = document.getElementById("taskInput");
+            let taskText = taskInput.value.trim();
+
+            if (taskText === "") {
+                alert("กรุณากรอกชื่อรายการ!");
+                return;
+            }
+
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push({ text: taskText, completed: false });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            renderTask(taskText, false);
+            taskInput.value = "";
+        }
+
+        function renderTask(taskText, completed) {
+            let taskList = document.getElementById("taskList");
+            let li = document.createElement("li");
+            
+            let statusBtn = document.createElement("button");
+            statusBtn.className = "status-btn " + (completed ? "completed" : "pending");
+            statusBtn.textContent = completed ? "✔ เสร็จแล้ว" : "⏳ ยังไม่ได้ทำ";
+            statusBtn.onclick = function() {
+                toggleTask(li, taskText);
+            };
+
+            let deleteBtn = document.createElement("button");
+            deleteBtn.className = "delete-btn";
+            deleteBtn.textContent = "ลบ";
+            deleteBtn.onclick = function() {
+                removeTask(li, taskText);
+            };
+            
+            let actionsDiv = document.createElement("div");
+            actionsDiv.className = "task-actions";
+            actionsDiv.appendChild(statusBtn);
+            actionsDiv.appendChild(deleteBtn);
+            
+            li.textContent = taskText;
+            li.appendChild(actionsDiv);
+            taskList.appendChild(li);
+        }
+
+        function removeTask(taskItem, taskText) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks = tasks.filter(task => task.text !== taskText);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            taskItem.remove();
+        }
+
+        function toggleTask(taskItem, taskText) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.forEach(task => {
+                if (task.text === taskText) {
+                    task.completed = !task.completed;
+                }
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            
+            let statusBtn = taskItem.querySelector(".status-btn");
+            let isCompleted = statusBtn.classList.contains("completed");
+            statusBtn.className = "status-btn " + (isCompleted ? "pending" : "completed");
+            statusBtn.textContent = isCompleted ? "⏳ ยังไม่ได้ทำ" : "✔ เสร็จแล้ว";
+        }
+
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.forEach(task => renderTask(task.text, task.completed));
+        }
+    </script>
+</body>
+</html>
