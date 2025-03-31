@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ✅ เพิ่ม useNavigate
 import "./Register.css";
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", password: "", phone: "" });
+  const navigate = useNavigate(); // ✅ ใช้งาน useNavigate
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
     if (!form.username || !form.password || !form.phone) {
       alert("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
@@ -20,6 +20,11 @@ export default function Register() {
     try {
       const res = await axios.post("http://localhost:3006/register", form);
       alert(res.data.message);
+
+      // ✅ ถ้าสมัครสำเร็จ → กลับไปหน้า login
+      if (res.data.message.includes("Register success")) {
+        navigate("/"); // ไปหน้า Login
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Register failed");
     }

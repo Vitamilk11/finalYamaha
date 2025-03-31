@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require("../DB");
 const bcrypt = require("bcrypt");
 
-// Register
+// ✅ REGISTER
 router.post("/register", async (req, res) => {
   const { username, password, phone } = req.body;
 
@@ -11,17 +11,14 @@ router.post("/register", async (req, res) => {
     return res.status(400).json({ message: "❌ Missing fields" });
   }
 
-  // ตรวจสอบความยาว username และ password
   if (username.length < 3 || password.length < 6) {
     return res.status(400).json({ message: "❌ Username or password too short" });
   }
 
-  // ตรวจสอบว่า phone เป็นตัวเลข
   if (!/^\d{10}$/.test(phone)) {
     return res.status(400).json({ message: "❌ Invalid phone number" });
   }
 
-  // ตรวจสอบว่า username ซ้ำ
   const checkSql = "SELECT * FROM users WHERE username = ?";
   db.query(checkSql, [username], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -29,7 +26,6 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "❌ Username already exists" });
     }
 
-    // ถ้าไม่ซ้ำ, ทำการเข้ารหัส password
     bcrypt.hash(password, 10, (err, hashedPassword) => {
       if (err) return res.status(500).json({ message: "❌ Password hashing error" });
 
@@ -39,35 +35,44 @@ router.post("/register", async (req, res) => {
         res.json({
           message: "✅ Register success",
           user: {
-            user_id: result.insertId,  // ส่ง user_id กลับ
-            username: username
-          }
+            user_id: result.insertId,
+            username: username,
+          },
         });
       });
     });
   });
 });
 
-// Login (ยังคงเหมือนเดิม)
+// ✅ LOGIN
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   const sql = "SELECT * FROM users WHERE username = ?";
 
   db.query(sql, [username], async (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.length === 0) return res.status(401).json({ message: "❌ User not found" });
+    if (err) return res.status(500).json({ message: "❌ Server error" });
 
-    const isMatch = await bcrypt.compare(password, result[0].password);
-    if (isMatch) {
-      res.json({
-        message: "✅ Login success",
-        user: {
-          id: result[0].user_id,
-          username: result[0].username
-        }
-      });
-    } else {
-      res.status(401).json({ message: "❌ Invalid password" });
+    if (result.length === 0) {
+      return res.status(401).json({ message: "❌ User not found" });
+    }
+
+    try {
+      const isMatch = await bcrypt.compare(password, result[0].password);
+      if (isMatch) {
+        res.json({
+          message: "✅ Login success",
+          user: {
+            id: result[0].user_id,
+            username: result[0].username,
+            phone: result[0].phone,
+          },
+        });
+      } else {
+        res.status(401).json({ message: "❌ Invalid password" });
+      }
+    } catch (compareErr) {
+      console.error("bcrypt compare error:", compareErr);
+      res.status(500).json({ message: "❌ Error comparing password" });
     }
   });
 });

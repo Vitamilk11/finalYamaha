@@ -1,27 +1,31 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login/Login';
 import Register from './Register/Register';
-import Layout from './layouts/Layout/Layout';
-import './App.css';
+import Home from './pages/Home/Home';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);  // ใช้สถานะสำหรับเช็คว่า login เสร็จแล้วหรือยัง
-  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ฟังก์ชันที่ใช้เมื่อ login สำเร็จ
-  const handleLogin = () => {
-    setIsLoggedIn(true);  // เมื่อ login สำเร็จ
-    navigate('/layout');  // เปลี่ยนเส้นทางไปที่ Layout
-  };
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login onLogin={handleLogin} />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/layout" element={isLoggedIn ? <Layout /> : <Login onLogin={handleLogin} />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/home"
+        element={
+          isLoggedIn ? <Home /> : <Navigate to="/" replace />
+        }
+      />
+    </Routes>
   );
 }
+
+export default App;
