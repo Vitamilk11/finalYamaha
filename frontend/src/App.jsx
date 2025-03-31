@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login/Login';
 import Register from './Register/Register';
-import Home from './pages/Home/Home';
+import Layout from './layouts/Layout/Layout'; // 👈 เปลี่ยนกลับมาใช้ Layout
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,9 +19,9 @@ function App() {
       <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
       <Route path="/register" element={<Register />} />
       <Route
-        path="/home"
+        path="/layout" // 👈 เปลี่ยน path กลับเป็น layout
         element={
-          isLoggedIn ? <Home /> : <Navigate to="/" replace />
+          isLoggedIn ? <Layout /> : <Navigate to="/" replace />
         }
       />
     </Routes>

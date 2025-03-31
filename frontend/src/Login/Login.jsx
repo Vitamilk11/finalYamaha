@@ -18,7 +18,7 @@ export default function Login({ setIsLoggedIn }) {
       });
 
       if (res.data.message.includes("success")) {
-        alert("✅ เข้าสู่ระบบสำเร็จ");
+        ;
 
         // ✅ บอก App ว่าล็อกอินแล้ว
         setIsLoggedIn(true);
@@ -26,8 +26,8 @@ export default function Login({ setIsLoggedIn }) {
         // ✅ เก็บข้อมูลผู้ใช้
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        // ✅ เปลี่ยนเส้นทางไปหน้า home
-        navigate("/home");
+        // ✅ เปลี่ยนเส้นทางไปหน้า layout
+        navigate("/layout"); // 🔄 เปลี่ยนจาก /home → /layout
       } else {
         alert(res.data.message);
       }
@@ -41,7 +41,17 @@ export default function Login({ setIsLoggedIn }) {
   return (
     <div className="login-container">
       <form className="login-form" onSubmit={handleLogin}>
-        <h2>🔒 Login</h2>
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
+          <img
+            src="yamaha-logo.png"
+            alt="Yamaha Logo"
+            style={{ width: "150px", height: "auto", borderRadius: "6px" }}
+          />
+        </div>
         <input
           type="text"
           placeholder="Username"
@@ -56,7 +66,7 @@ export default function Login({ setIsLoggedIn }) {
         />
         <button type="submit">Login</button>
         <p className="register-link">
-          ยังไม่มีบัญชี? <Link to="/register">สมัครเลย</Link>
+          ยังไม่มีบัญชี <Link to="/register">สมัครเลย</Link>
         </p>
       </form>
     </div>
